@@ -10,7 +10,7 @@ public class RedApple {
     public void onServerStart(GameStartedServerEvent event) {
         // Hey! The server has started!
         // Try instantiating your logger in here.
-        // (There's a guide for that)
-        System.out.println("Joey is a Freak");
+        // (There's a guide for that) 
+    	//Test comment
     }
 }
