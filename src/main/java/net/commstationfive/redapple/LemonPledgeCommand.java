@@ -9,6 +9,8 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
+
 import com.google.inject.Inject;
 
 public class LemonPledgeCommand implements CommandExecutor {
@@ -19,13 +21,15 @@ public class LemonPledgeCommand implements CommandExecutor {
 	public CommandResult execute(CommandSource src, CommandContext args) throws
 	CommandException {
 		
+		MessageChannel broadcast = MessageChannel.TO_ALL;
+		
 		if(src instanceof Player) {
 			
 			Player player = (Player) src;
-			player.sendMessage(Text.of(player.getName() + " demands more lemon pledge!"));		
+			broadcast.send(Text.of(player.getName() + " demands more lemon pledge!"));		
 		} else {
 			
-			src.sendMessage(Text.of("The gods demand more lemon pledge!"));	
+			broadcast.send(Text.of("The gods demand more lemon pledge!"));	
 		}
 		logger.debug("Demand for lemon pledge from source: " + src);
 		
