@@ -24,6 +24,7 @@ import org.spongepowered.api.text.channel.MessageChannel;
 public class AFKCommand implements CommandExecutor {
 	
 	
+	@SuppressWarnings("unused")
 	private static final Logger logger = RedApple.getLogger();
 	private static final Set<UUID> AFK_PLAYERS = new HashSet<>();
 	private static final MessageChannel BROADCAST = MessageChannel.TO_ALL;

@@ -1,7 +1,6 @@
 package net.commstationfive.redapple;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -11,12 +10,9 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 
-import com.google.inject.Inject;
-
 public class LemonPledgeCommand implements CommandExecutor {
 	
-	@Inject
-	private static final Logger logger = LoggerFactory.getLogger(LemonPledgeCommand.class);
+	private static final Logger logger = RedApple.getLogger();
 
 	public CommandResult execute(CommandSource src, CommandContext args) throws
 	CommandException {
@@ -27,6 +23,7 @@ public class LemonPledgeCommand implements CommandExecutor {
 			
 			Player player = (Player) src;
 			broadcast.send(Text.of(player.getName() + " demands more lemon pledge!"));		
+			
 		} else {
 			
 			broadcast.send(Text.of("The gods demand more lemon pledge!"));	
@@ -34,11 +31,6 @@ public class LemonPledgeCommand implements CommandExecutor {
 		logger.debug("Demand for lemon pledge from source: " + src);
 		
         return CommandResult.success();
-	}
-	
-	public Logger getLogger() {
-		
-		return logger;
 	}
 
 }
