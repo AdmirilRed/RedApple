@@ -48,9 +48,16 @@ public class RedApple {
     			.arguments(GenericArguments.optional(GenericArguments.literal(Text.of("Lock movement"), "lock")))
     			.executor(new AFKCommand())
     			.build();
+    	
+    	CommandSpec pingCommandSpec = CommandSpec.builder()
+    			.description(Text.of("Test the response time of the server"))
+    			.permission("redapple.command.ping")
+    			.executor(new PingCommand())
+    			.build();
        	
     	cmdManager.register(this, lemonPledgeCommandSpec, "lemonpledge"); 
     	cmdManager.register(this, afkCommandSpec, "afk");
+    	cmdManager.register(this, pingCommandSpec, "ping");
 
     	evntManager.registerListeners(this, new AFKCommand());
 
