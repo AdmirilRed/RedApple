@@ -20,6 +20,7 @@ import org.spongepowered.api.event.entity.TargetEntityEvent;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.text.format.TextColors;
 
 public class AFKCommand implements CommandExecutor {
 	
@@ -31,14 +32,16 @@ public class AFKCommand implements CommandExecutor {
 	
 	private void goAFK(Player player) {
 		
-		BROADCAST.send(Text.of(player.getName() + " is now AFK."));
+		Text message = Text.builder(player.getName() + " is now AFK").color(TextColors.RED).build();
+		BROADCAST.send(message);
 		AFK_PLAYERS.add(player.getUniqueId());
 		
 	}
 	
 	private void returnFromAFK(Player player) {
 		
-		BROADCAST.send(Text.of(player.getName() + " has returned!"));
+		Text message = Text.builder(player.getName() + " has returned!").color(TextColors.GREEN).build();
+		BROADCAST.send(message);
 		AFK_PLAYERS.remove(player.getUniqueId());
 	}
 	

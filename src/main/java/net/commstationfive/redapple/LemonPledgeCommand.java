@@ -9,9 +9,11 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.text.format.TextColors;
 
 public class LemonPledgeCommand implements CommandExecutor {
 	
+	@SuppressWarnings("unused")
 	private static final Logger logger = RedApple.getLogger();
 
 	public CommandResult execute(CommandSource src, CommandContext args) throws
@@ -22,13 +24,15 @@ public class LemonPledgeCommand implements CommandExecutor {
 		if(src instanceof Player) {
 			
 			Player player = (Player) src;
-			broadcast.send(Text.of(player.getName() + " demands more lemon pledge!"));		
+			
+			Text message = Text.builder(player.getName() + " demands more lemon pledge!").color(TextColors.GOLD).build();
+			broadcast.send(message);		
 			
 		} else {
 			
-			broadcast.send(Text.of("The gods demand more lemon pledge!"));	
+			Text message = Text.builder("The gods demand more lemon pledge!").color(TextColors.GOLD).build();
+			broadcast.send(message);	
 		}
-		logger.debug("Demand for lemon pledge from source: " + src);
 		
         return CommandResult.success();
 	}
