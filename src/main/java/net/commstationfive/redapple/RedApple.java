@@ -34,6 +34,9 @@ public class RedApple {
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
     	
+    	
+    	Sponge.getEventManager().registerListeners(this, new AFKCommand());
+    	
     	CommandSpec lemonPledgeCommandSpec = CommandSpec.builder()
     		    .description(Text.of("Demand lemon pledge!"))
     		    .permission("redapple.command.lemonpledge")
@@ -48,10 +51,14 @@ public class RedApple {
        	
     	cmdManager.register(this, lemonPledgeCommandSpec, "lemonpledge"); 
     	cmdManager.register(this, afkCommandSpec, "afk");
-    	
-    	evntManager.registerListeners(this, new AFKCommand());
+
 
         logger.info("RedApple loaded!");
+    }
+    
+    public static Logger getLogger() {
+    	
+    	return logger;
     }
     
 }
