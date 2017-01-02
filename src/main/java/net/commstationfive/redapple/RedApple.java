@@ -9,6 +9,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
@@ -21,6 +22,7 @@ public class RedApple {
 	
 	private static final Logger logger = LoggerFactory.getLogger(RedApple.class);
 	private static final CommandManager cmdManager = Sponge.getCommandManager();
+	private static final EventManager evntManager = Sponge.getEventManager();
 	
 	@Inject
 	private Game game;
@@ -37,8 +39,17 @@ public class RedApple {
     		    .permission("redapple.command.lemonpledge")
     		    .executor(new LemonPledgeCommand())
     		    .build();
+    	
+    	CommandSpec afkCommandSpec = CommandSpec.builder()
+    			.description(Text.of("Let other players know you are not at the keyboard."))
+    			.permission("redapple.command.afk")
+    			.executor(new AFKCommand())
+    			.build();
        	
     	cmdManager.register(this, lemonPledgeCommandSpec, "lemonpledge"); 
+    	cmdManager.register(this, afkCommandSpec, "afk");
+    	
+    	evntManager.registerListeners(this, new AFKCommand());
 
         logger.info("RedApple loaded!");
     }
