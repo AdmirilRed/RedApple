@@ -1,8 +1,8 @@
 package net.commstationfive.redapple;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -16,7 +16,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.entity.TargetEntityEvent;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -27,14 +26,14 @@ public class AFKCommand implements CommandExecutor {
 	
 	@SuppressWarnings("unused")
 	private static final Logger logger = RedApple.getLogger();
-	private static final Set<UUID> AFK_PLAYERS = new HashSet<>();
+	private static final Map<UUID, Boolean> AFK_PLAYERS = new HashMap<>();
 	private static final MessageChannel BROADCAST = MessageChannel.TO_ALL;
 	
-	private void goAFK(Player player) {
+	private void goAFK(Player player, boolean lockMovement) {
 		
 		Text message = Text.builder(player.getName() + " is now AFK").color(TextColors.RED).build();
 		BROADCAST.send(message);
-		AFK_PLAYERS.add(player.getUniqueId());
+		AFK_PLAYERS.put(player.getUniqueId(), lockMovement);
 		
 	}
 	
@@ -44,33 +43,21 @@ public class AFKCommand implements CommandExecutor {
 		BROADCAST.send(message);
 		AFK_PLAYERS.remove(player.getUniqueId());
 	}
-	
-	private void returnFromAFK(TargetEntityEvent event) {
-		
-		Entity entity = event.getTargetEntity();
-		
-		if(entity instanceof Player) {
-			
-			Player player = (Player) entity;
-			
-			if(AFK_PLAYERS.contains(player.getUniqueId())) {
-				
-				returnFromAFK(player);
-				
-			}
-			
-		}
-	}
 
 	public CommandResult execute(CommandSource src, CommandContext args) throws
 	CommandException {
 		
+		boolean lockMovement = false;
+		
+		if(args.hasAny("Lock movement"))
+			lockMovement = true;
+		
 		if(src instanceof Player) {
 			
 			Player player = (Player) src;
-			if(!AFK_PLAYERS.contains(player.getUniqueId())) {
+			if(!AFK_PLAYERS.keySet().contains(player.getUniqueId())) {
 				
-				goAFK(player);
+				goAFK(player, lockMovement);
 				return CommandResult.success();
 				
 			} else {
@@ -86,7 +73,31 @@ public class AFKCommand implements CommandExecutor {
 	@Listener
 	public void onPlayerMove(MoveEntityEvent event) {
 		
-		returnFromAFK(event);
+		Entity entity = event.getTargetEntity();
+		
+		if(entity instanceof Player) {
+			
+			Player player = (Player) entity;
+			UUID id = player.getUniqueId();
+			
+			if(AFK_PLAYERS.get(id) != null) {
+				
+				boolean lockMovement = AFK_PLAYERS.get(id);
+				
+				if(lockMovement) {
+					
+					event.setCancelled(true);
+					
+					Text message = Text.builder("You are AFK! Type /afk to re-enable movement.").color(TextColors.AQUA).build();
+					player.sendMessage(message);
+				} else {
+					
+					returnFromAFK(player);
+				}
+				
+			}
+			
+		}
 	}
 	
 	@Listener
@@ -99,7 +110,7 @@ public class AFKCommand implements CommandExecutor {
 			List<Player> involvedPlayers = cause.allOf(Player.class);
 			for(Player player : involvedPlayers) {
 				
-				if(AFK_PLAYERS.contains(player.getUniqueId())) {
+				if(AFK_PLAYERS.get(player.getUniqueId()) != null) {
 					
 					returnFromAFK(player);
 				}

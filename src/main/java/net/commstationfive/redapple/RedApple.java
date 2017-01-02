@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.EventManager;
@@ -42,8 +43,9 @@ public class RedApple {
     		    .build();
     	
     	CommandSpec afkCommandSpec = CommandSpec.builder()
-    			.description(Text.of("Let other players know you are not at the keyboard."))
+    			.description(Text.of("Let other players know you are not at the keyboard. Lock your movement using \"/afk lock\"."))
     			.permission("redapple.command.afk")
+    			.arguments(GenericArguments.optional(GenericArguments.literal(Text.of("Lock movement"), "lock")))
     			.executor(new AFKCommand())
     			.build();
        	
