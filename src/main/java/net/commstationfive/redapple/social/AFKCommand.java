@@ -1,4 +1,4 @@
-package net.commstationfive.redapple;
+package net.commstationfive.redapple.social;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +20,8 @@ import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColors;
+
+import net.commstationfive.redapple.RedApple;
 
 public class AFKCommand implements CommandExecutor {
 	

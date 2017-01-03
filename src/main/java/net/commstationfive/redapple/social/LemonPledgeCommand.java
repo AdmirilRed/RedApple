@@ -1,4 +1,4 @@
-package net.commstationfive.redapple;
+package net.commstationfive.redapple.social;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.command.CommandException;
@@ -10,6 +10,8 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColors;
+
+import net.commstationfive.redapple.RedApple;
 
 public class LemonPledgeCommand implements CommandExecutor {
 	
