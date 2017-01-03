@@ -1,4 +1,4 @@
-package net.commstationfive.redapple;
+package net.commstationfive.redapple.util;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;

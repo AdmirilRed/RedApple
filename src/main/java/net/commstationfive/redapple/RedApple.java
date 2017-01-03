@@ -18,6 +18,10 @@ import org.spongepowered.api.text.Text;
 
 import com.google.inject.Inject;
 
+import net.commstationfive.redapple.social.AFKCommand;
+import net.commstationfive.redapple.social.LemonPledgeCommand;
+import net.commstationfive.redapple.util.PingCommand;
+
 @Plugin(id = "redapple", name = "RedApple", version = "1.0")
 public class RedApple {
 	
