@@ -29,9 +29,8 @@ public class RedApple {
 	private static final CommandManager cmdManager = Sponge.getCommandManager();
 	private static final EventManager evntManager = Sponge.getEventManager();
 	
-	@SuppressWarnings("unused")
 	@Inject
-	private Game game;
+	private static Game game;
 	
 	@Inject
 	@ConfigDir(sharedRoot = false)
@@ -71,6 +70,11 @@ public class RedApple {
     public static Logger getLogger() {
     	
     	return logger;
+    }
+    
+    public static Game getGame() {
+    	
+    	return game;
     }
     
 }
