@@ -1,10 +1,10 @@
 package net.commstationfive.redapple.social;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
+import java.util.Set;
 import org.slf4j.Logger;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -17,6 +17,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.message.MessageChannelEvent;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColors;
@@ -28,14 +29,15 @@ public class AFKCommand implements CommandExecutor {
 	
 	@SuppressWarnings("unused")
 	private static final Logger logger = RedApple.getLogger();
-	private static final Map<UUID, Boolean> AFK_PLAYERS = new HashMap<>();
+	private static final Map<Player, Boolean> AFK_PLAYERS = new HashMap<>();
+	private static final Map<Player, Set<Player>> PLAYER_MENTIONS = new HashMap<>();
 	private static final MessageChannel BROADCAST = MessageChannel.TO_ALL;
 	
 	private void goAFK(Player player, boolean lockMovement) {
 		
 		Text message = Text.builder(player.getName() + " is now AFK").color(TextColors.RED).build();
 		BROADCAST.send(message);
-		AFK_PLAYERS.put(player.getUniqueId(), lockMovement);
+		AFK_PLAYERS.put(player, lockMovement);
 		
 	}
 	
@@ -43,7 +45,36 @@ public class AFKCommand implements CommandExecutor {
 		
 		Text message = Text.builder(player.getName() + " has returned!").color(TextColors.GREEN).build();
 		BROADCAST.send(message);
-		AFK_PLAYERS.remove(player.getUniqueId());
+		
+		Set<Player> mentions = PLAYER_MENTIONS.get(player);
+		if(mentions != null && mentions.size() > 0) {
+			
+			StringBuilder notificationBuilder = new StringBuilder();
+			notificationBuilder.append("The following player(s) tried to get your attention while you were AFK: ");
+			
+			int remainingMentions = mentions.size();
+			for(Player mention : mentions) {
+				
+				notificationBuilder.append(mention.getName());
+				
+				if(remainingMentions > 1)
+					notificationBuilder.append(", ");
+				
+				remainingMentions--;
+			}
+			
+			Text notification = Text.builder(notificationBuilder.toString()).color(TextColors.AQUA).build();
+			player.sendMessage(notification);
+			
+		}
+		
+		removePlayer(player);
+	}
+	
+	private void removePlayer(Player player) {
+		
+		AFK_PLAYERS.remove(player);
+		PLAYER_MENTIONS.remove(player);
 	}
 
 	public CommandResult execute(CommandSource src, CommandContext args) throws
@@ -57,7 +88,7 @@ public class AFKCommand implements CommandExecutor {
 		if(src instanceof Player) {
 			
 			Player player = (Player) src;
-			if(!AFK_PLAYERS.keySet().contains(player.getUniqueId())) {
+			if(!AFK_PLAYERS.keySet().contains(player)) {
 				
 				goAFK(player, lockMovement);
 				return CommandResult.success();
@@ -75,50 +106,89 @@ public class AFKCommand implements CommandExecutor {
 	@Listener
 	public void onPlayerMove(MoveEntityEvent event) {
 		
-		Entity entity = event.getTargetEntity();
-		
-		if(entity instanceof Player) {
+		if(!AFK_PLAYERS.isEmpty()) {
 			
-			Player player = (Player) entity;
-			UUID id = player.getUniqueId();
-			
-			if(AFK_PLAYERS.get(id) != null) {
+			Entity entity = event.getTargetEntity();
+			if(entity instanceof Player) {
 				
-				boolean lockMovement = AFK_PLAYERS.get(id);
-				
-				if(lockMovement) {
+				Player player = (Player) entity;	
+				if(AFK_PLAYERS.get(player) != null) {
 					
-					event.setCancelled(true);
+					boolean lockMovement = AFK_PLAYERS.get(player);
 					
-					Text message = Text.builder("You are AFK! Type /afk to re-enable movement.").color(TextColors.AQUA).build();
-					player.sendMessage(message);
-				} else {
+					if(lockMovement) {
+						
+						event.setCancelled(true);
+						
+						Text message = Text.builder("You are AFK! Type /afk to re-enable movement.").color(TextColors.AQUA).build();
+						player.sendMessage(message);
+					} else {
+						
+						returnFromAFK(player);
+					}
 					
-					returnFromAFK(player);
 				}
 				
 			}
-			
 		}
 	}
 	
 	@Listener
 	public void onPlayerChat(MessageChannelEvent.Chat event) {
 		
-		Cause cause = event.getCause();
-		
-		if(cause.containsType(Player.class)) {
+		if(!AFK_PLAYERS.isEmpty()) {
 			
-			List<Player> involvedPlayers = cause.allOf(Player.class);
-			for(Player player : involvedPlayers) {
+			Cause cause = event.getCause();
+			String message = event.getMessage().toString();
+			
+			if(cause.containsType(Player.class)) {
 				
-				if(AFK_PLAYERS.get(player.getUniqueId()) != null) {
+				List<Player> involvedPlayers = cause.allOf(Player.class);
+				for(Player player : AFK_PLAYERS.keySet()) {
 					
-					returnFromAFK(player);
+					if(involvedPlayers.contains(player)) {
+						
+						returnFromAFK(player);
+						
+					} else if(message.contains(player.getName())) {
+						
+						Set<Player> mentions = PLAYER_MENTIONS.get(player);
+						if(mentions == null) {
+							
+							mentions = new HashSet<Player>();
+							PLAYER_MENTIONS.put(player, mentions);
+						}
+						
+						for(Player source : involvedPlayers) {
+							
+							StringBuilder notificationBuilder = 
+									new StringBuilder(player.getName());
+							notificationBuilder.append(" is AFK. They will be notified of your message when they return.");
+							
+							Text notification = Text.builder(notificationBuilder.toString()).color(TextColors.AQUA).build();
+							source.sendMessage(notification);
+							
+							mentions.add(source);
+						}
+						
+					}
 				}
+				
+				
+				
 			}
 		}
 
+	}
+	
+	@Listener
+	public void onPlayerDisconnect(ClientConnectionEvent.Disconnect event) {
+		
+		if(!AFK_PLAYERS.isEmpty()) {
+			
+			Player player = event.getTargetEntity();
+			removePlayer(player);
+		}
 	}
 	
 }
