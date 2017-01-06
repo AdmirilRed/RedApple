@@ -152,6 +152,13 @@ public class AFKCommand implements CommandExecutor {
 						
 					} else if(message.contains(player.getName())) {
 						
+						Set<Player> mentions = PLAYER_MENTIONS.get(player);
+						if(mentions == null) {
+							
+							mentions = new HashSet<Player>();
+							PLAYER_MENTIONS.put(player, mentions);
+						}
+						
 						for(Player source : involvedPlayers) {
 							
 							StringBuilder notificationBuilder = 
@@ -160,16 +167,10 @@ public class AFKCommand implements CommandExecutor {
 							
 							Text notification = Text.builder(notificationBuilder.toString()).color(TextColors.AQUA).build();
 							source.sendMessage(notification);
-						}
-						
-						Set<Player> mentions = PLAYER_MENTIONS.get(player);
-						if(mentions == null) {
 							
-							PLAYER_MENTIONS.put(player, new HashSet<Player>());
+							mentions.add(source);
 						}
 						
-						mentions.addAll(involvedPlayers);
-			
 					}
 				}
 				
